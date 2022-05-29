@@ -1,0 +1,95 @@
+#! /bin/sh
+
+# Keymaps
+pgrep -x sxhkd > /dev/null || sxhkd &
+
+############################
+# BSPWM WINDOW RULES
+############################
+
+bspc rule -a Gimp desktop='^4' state=floating follow=on
+bspc rule -a qutebrowser desktop='^2'
+bspc rule -a atom desktop='^3'
+
+############################
+# Global BSPWM settings
+############################
+bspc config border_width         2
+bspc config border_radius         12
+bspc config window_gap           4
+bspc config top_padding 6
+
+# Disable focus stealing
+bspc config ignore_ewmh_focus
+bspc config ignore_ewmh_fullscreen all
+
+bspc config active_border_color '#651FFF'
+bspc config normal_border_color '#4527A0'
+bspc config focused_border_color '#b57614'
+
+# Smoothen floating window movements
+bspc config pointer_motion_interval 1
+
+bspc config split_ratio          0.5
+bspc config borderless_monocle   true
+bspc config gapless_monocle      true
+bspc config remove_unplugged_monitors true
+
+# #####################
+# STARTUP PROGRAMS
+# #####################
+
+# Window Swallowing
+# pgrep bspswallow || bspswallow &
+
+# Wallpaper
+nitrogen --set-auto -random "~/Pictures/WPS/" &
+
+# Experimental backends added to remove screen tearing
+pgrep picom || picom -b  &
+
+# Lock screen after certain amount of time
+pgrep xautolock || xautolock -time 10 -locker "i3lock" &
+
+
+/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
+# exec nitrogen --restore; sleep 1;  &
+
+# Network
+pgrep nm-applet || nm-applet &
+
+# power manager
+pgrep xfce4-power-manager || xfce4-power-manager &
+
+
+########################
+## MULTI MONITOR support
+#########################
+M=$(bspc query -M | wc -l)
+if [[ "$M" == 1 ]]; then
+	# Reset to original screen if reloading
+	mons -o
+	bspc monitor -d I II III IV V
+elif [[ "$M" == 2 ]]; then
+	screens=$(xrandr --listactivemonitors | grep -v "Monitors" | cut -d" " -f6)
+
+	sleep 1
+	bspc monitor $(bspc query -M | awk NR==1) -d I II III IV V
+	bspc monitor $(bspc query -M | awk NR==2) -d VI VII VIII IX X
+
+	# mons --primary {{external_monitor}}
+	# mons -e top
+	# bspc monitor {{internal_monitor}} -d I X
+	# bspc monitor {{external_monitor}} -d II III IV V VI VII VIII IX
+
+	# Get second entry
+	secondScreen=$(echo $screens | sed -n 2p)
+	# if [[ "$secondScreen" == "HDMI1" ]]; then
+		# polybar hdmi1 &
+	# else
+		polybar secondary &
+	# fi
+
+fi
+
+export _JAVA_AWT_WM_NONREPARENTING=1
