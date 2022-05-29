@@ -23,7 +23,7 @@
          bspc {quit,wm -r} 
   
  # close and kill 
- super + {_,shift + } q
+ super + {_,shift + } m
          bspc node -{c,k} 
   
  # alternate between the tiled and monocle layout 
@@ -101,7 +101,7 @@
          bspc node -p cancel 
   
  # cancel the preselection for the focused desktop 
- super + ctrl + shift + space 
+ super + ctrl + shift + space
          bspc query -N -d | xargs -I id -n 1 bspc node id -p cancel 
   
  # 
